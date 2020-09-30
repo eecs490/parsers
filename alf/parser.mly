@@ -28,7 +28,7 @@ expr:
 | IF e1 = expr THEN e2 = expr ELSE e3 = expr
     { EIf (e1, e2, e3) }
 | FUN LPAREN v = var OFTYPE t = ty RPAREN ARROW e = expr
-    { EFun (v, ty, e) }
+    { EFun (v, t, e) }
 
 boolean:
 | e = arith
