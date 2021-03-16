@@ -134,3 +134,5 @@ base_ty:
     { Typ.Bool }
 | UNIT
     { Typ.Unit }
+| LPAREN t = ty RPAREN
+    { t }

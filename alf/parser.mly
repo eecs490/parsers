@@ -87,3 +87,5 @@ base_ty:
     { Num }
 | BOOL
     { Bool }
+| LPAREN t = ty RPAREN
+    { t }

@@ -140,3 +140,5 @@ base_ty:
     { Typ.TUnit }
 | THOLE
     { Typ.THole }
+| LPAREN t = ty RPAREN
+    { t }
