@@ -11,7 +11,7 @@
 %token LPAREN RPAREN
 %token EOL
 
-%start <Syntax.expr> main
+%start <Syntax.Expr.t> main
 %{ open Syntax %}
 
 %%
@@ -24,51 +24,57 @@ expr:
 | e = boolean
     { e }
 | LET v = var OFTYPE t = ty BE e1 = expr IN e2 = expr
-    { ELetAnn (v, t, e1, e2) }
+    { Expr.ELetAnn (v, t, e1, e2) }
 | IF e1 = expr THEN e2 = expr ELSE e3 = expr
-    { EIf (e1, e2, e3) }
+    { Expr.EIf (e1, e2, e3) }
 | FUN LPAREN v = var OFTYPE t = ty RPAREN ARROW e = expr
-    { EFun (v, t, e) }
+    { Expr.EFun (v, t, e) }
 
 boolean:
 | e = arith
     { e }
 | e1 = arith GT e2 = arith
-    { EBinOp (e1, OpGt, e2) }
+    { Expr.EBinOp (e1, OpGt, e2) }
 | e1 = arith LT e2 = arith
-    { EBinOp (e1, OpLt, e2) }
+    { Expr.EBinOp (e1, OpLt, e2) }
 | e1 = arith EQ e2 = arith
-    { EBinOp (e1, OpEq, e2) }
+    { Expr.EBinOp (e1, OpEq, e2) }
 
 arith:
 | e = factor
     { e }
 | e1 = arith PLUS e2 = factor
-    { EBinOp (e1, OpPlus,e2) }
+    { Expr.EBinOp (e1, OpPlus,e2) }
 | e1 = arith MINUS e2 = factor
-    { EBinOp (e1, OpMinus, e2) }
+    { Expr.EBinOp (e1, OpMinus, e2) }
 
 factor:
 | e = app
     { e }
 | e1 = factor TIMES e2 = app
-    { EBinOp (e1, OpTimes, e2) }
+    { Expr.EBinOp (e1, OpTimes, e2) }
 
 app:
 | e = simple
     { e }
 | e1 = app e2 = simple
-    { EBinOp (e1, OpAp, e2) }
-| MINUS e = simple
-    { EUnOp (OpNeg, e) }
+    { Expr.EBinOp (e1, OpAp, e2) }
+| MINUS i = INT
+    { Expr.ENumLiteral i }
+| MINUS e = nonnum
+    { Expr.EUnOp (OpNeg, e) }
 
 simple:
-| e = var
-    { EVar (e) }
+| e = nonnum
+    { e }
 | i = INT
-    { ENumLiteral i }
+    { Expr.ENumLiteral i }
+
+nonnum:
+| e = var
+    { Expr.EVar (e) }
 | b = BOOLLIT
-    { EBoolLiteral b }
+    { Expr.EBoolLiteral b }
 | LPAREN e = expr RPAREN
     { e }
 
@@ -80,12 +86,12 @@ ty:
 | t = base_ty
     { t }
 | t1 = base_ty ARROW t2 = ty
-    { Arrow (t1, t2) }
+    { Typ.Arrow (t1, t2) }
 
 base_ty:
 | NUM
-    { Num }
+    { Typ.Num }
 | BOOL
-    { Bool }
+    { Typ.Bool }
 | LPAREN t = ty RPAREN
     { t }

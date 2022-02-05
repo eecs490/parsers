@@ -1,17 +1,39 @@
-type ty = Num | Bool | Arrow of ty * ty
+module Typ = struct
+  type t = Num | Bool | Arrow of t * t
+end
 
-type unop = OpNeg
+module Identifier = struct
+  type t = string
 
-type binop = OpAp | OpLt | OpGt | OpEq | OpPlus | OpMinus | OpTimes
+  (* Use this to compare Identifiers for equality! *)
+  let equal = String.equal
+end
 
-type identifier = string
+module Expr = struct
+  type unop = OpNeg
 
-type expr =
-  | EVar of identifier
-  | ENumLiteral of int
-  | EBoolLiteral of bool
-  | EUnOp of unop * expr
-  | EBinOp of expr * binop * expr
-  | EIf of expr * expr * expr
-  | EFun of identifier * ty * expr
-  | ELetAnn of identifier * ty * expr * expr
+  type binop = OpAp | OpLt | OpGt | OpEq | OpPlus | OpMinus | OpTimes
+
+  type t =
+    | EVar of Identifier.t
+    | ENumLiteral of int
+    | EBoolLiteral of bool
+    | EUnOp of unop * t
+    | EBinOp of t * binop * t
+    | EIf of t * t * t
+    | EFun of Identifier.t * Typ.t * t
+    | ELetAnn of Identifier.t * Typ.t * t * t
+end
+
+module Value = struct
+  type t =
+    | VNumLiteral of int
+    | VBoolLiteral of bool
+    | VFun of Identifier.t * Typ.t * Expr.t
+
+  let to_expr (v:t):Expr.t =
+      match v with
+      | VNumLiteral n -> ENumLiteral n
+      | VBoolLiteral b -> EBoolLiteral b
+      | VFun (i, t, e) -> EFun (i, t, e)
+end
