@@ -65,7 +65,7 @@ and token = parse
     { ARROW }
 | "fun"
     { FUN }
-| "True" 
+| "True"
     { BOOLLIT (true) }
 | "False"
     { BOOLLIT (false) }
