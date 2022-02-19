@@ -3,8 +3,8 @@
 %token ARROW
 %token UNIT
 %token <int> INT
-%token REC DOT
-%token FORALLT
+%token REC IS
+%token FORALL
 %token <string> EID
 %token <string> TID
 %token <bool> BOOLLIT
@@ -16,11 +16,19 @@
 %token PLUS MINUS TIMES
 %token GT LT EQ
 %token LPAREN RPAREN
-%token ROLL UNROLL FORALL AT
+%token ROLL UNROLL TYPFUN AT
 %token LSQUARE RSQUARE
 %token EOL
 
-%start <Syntax.Exp.t> main
+%left GT LT EQ
+%left PLUS MINUS
+%left TIMES
+
+%right ARROW
+%right SUM
+%right PROD
+
+%start <Syntax.Expr.t> main
 %{ open Syntax %}
 
 %%
@@ -30,132 +38,111 @@ main:
     { e }
 
 expr:
-| e = boolean
+| e = opseq
     { e }
-| LET i = eid OFTYPE t = ty BE e1 = expr IN e2 = expr
-    { Exp.ELet (i, Some(t), e1, e2) }
-| LET i = eid BE e1 = expr IN e2 = expr
-    { Exp.ELet (i, None, e1, e2) }
+| LET i = EID OFTYPE t = ty BE e1 = expr IN e2 = expr
+    { Expr.ELet (i, Some(t), e1, e2) }
+| LET i = EID BE e1 = expr IN e2 = expr
+    { Expr.ELet (i, None, e1, e2) }
 | IF e1 = expr THEN e2 = expr ELSE e3 = expr
-    { Exp.EIf (e1, e2, e3) }
-| FUN LPAREN i = eid OFTYPE t = ty RPAREN ARROW e = expr
-    { Exp.EFun (i, Some(t), e) }
-| FUN i = eid ARROW e = expr
-    { Exp.EFun (i, None, e) }
-| FIX LPAREN i = eid OFTYPE t = ty RPAREN ARROW e = expr
-    { Exp.EFix (i, Some(t), e) }
-| FIX i = eid ARROW e = expr
-    { Exp.EFix (i, None, e) }
+    { Expr.EIf (e1, e2, e3) }
+| FUN LPAREN i = EID OFTYPE t = ty RPAREN ARROW e = expr
+    { Expr.EFun (i, Some(t), e) }
+| FUN i = EID ARROW e = expr
+    { Expr.EFun (i, None, e) }
+| FIX LPAREN i = EID OFTYPE t = ty RPAREN ARROW e = expr
+    { Expr.EFix (i, Some(t), e) }
+| FIX i = EID ARROW e = expr
+    { Expr.EFix (i, None, e) }
 | L e = expr
-    { Exp.EInjL (e) }
+    { Expr.EInjL (e) }
 | R e = expr
-    { Exp.EInjR (e) }
-| CASE e1 = expr OF L LPAREN x = eid RPAREN ARROW e2 = expr ELSE R LPAREN y = eid RPAREN ARROW e3 = expr
-    { Exp.ECase (e1, x, e2, y, e3) }
-| LET LPAREN x = eid COMMA y = eid RPAREN BE e1 = expr IN e2 = expr
-    { Exp.ELetPair (x, y, e1, e2) }
+    { Expr.EInjR (e) }
+| CASE e1 = expr OF L LPAREN x = EID RPAREN ARROW e2 = expr ELSE R LPAREN y = EID RPAREN ARROW e3 = expr
+    { Expr.ECase (e1, x, e2, y, e3) }
+| LET LPAREN x = EID COMMA y = EID RPAREN BE e1 = expr IN e2 = expr
+    { Expr.ELetPair (x, y, e1, e2) }
 | ROLL LPAREN e = expr RPAREN
-    { Exp.ERoll (e) }
+    { Expr.ERoll (e) }
 | UNROLL LPAREN e = expr RPAREN
-    { Exp.EUnroll (e) }
-| FORALL t = tid ARROW e = expr
-    { Exp.ETypFun (t, e) }
+    { Expr.EUnroll (e) }
+| TYPFUN t = TID ARROW e = expr
+    { Expr.ETypFun (t, e) }
 
-
-boolean:
-| e = arith
-    { e }
-| e1 = arith GT e2 = arith
-    { Exp.EBinOp (e1, Exp.OpGt, e2) }
-| e1 = arith LT e2 = arith
-    { Exp.EBinOp (e1, Exp.OpLt, e2) }
-| e1 = arith EQ e2 = arith
-    { Exp.EBinOp (e1, Exp.OpEq, e2) }
-
-arith:
-| e = factor
-    { e }
-| e1 = arith PLUS e2 = factor
-    { Exp.EBinOp (e1, Exp.OpPlus,e2) }
-| e1 = arith MINUS e2 = factor
-    { Exp.EBinOp (e1, Exp.OpMinus, e2) }
-
-factor:
+opseq:
 | e = app
     { e }
-| e1 = factor TIMES e2 = app
-    { Exp.EBinOp (e1, Exp.OpTimes, e2) }
+| e1 = opseq GT e2 = opseq %prec GT
+    { Expr.EBinOp (e1, OpGt, e2) }
+| e1 = opseq LT e2 = opseq %prec LT
+    { Expr.EBinOp (e1, OpLt, e2) }
+| e1 = opseq EQ e2 = opseq %prec EQ
+    { Expr.EBinOp (e1, OpEq, e2) }
+| e1 = opseq PLUS e2 = opseq %prec PLUS
+    { Expr.EBinOp (e1, OpPlus,e2) }
+| e1 = opseq MINUS e2 = opseq %prec MINUS
+    { Expr.EBinOp (e1, OpMinus, e2) }
+| e1 = opseq TIMES e2 = opseq %prec TIMES
+    { Expr.EBinOp (e1, OpTimes, e2) }
 
 app:
 | e = right
     { e }
 | e1 = app e2 = right
-    { Exp.EBinOp (e1, OpAp, e2) }
+    { Expr.EBinOp (e1, OpAp, e2) }
 | MINUS e = right
-    { Exp.EUnOp (OpNeg, e) }
+    { Expr.EUnOp (OpNeg, e) }
 
 right:
 | e = simple
     { e }
 | e = right LPRJ
-    { Exp.EPrjL (e) }
+    { Expr.EPrjL (e) }
 | e = right RPRJ
-    { Exp.EPrjR (e) }
+    { Expr.EPrjR (e) }
 | e = right LSQUARE AT t = ty RSQUARE
-    { Exp.ETypAp (e, t) }
+    { Expr.ETypAp (e, t) }
 
 simple:
-| e = eid
-    { Exp.EVar (e) }
+| i = EID
+    { Expr.EVar i }
 | i = INT
-    { Exp.ENumLiteral i }
+    { Expr.ENumLiteral i }
 | b = BOOLLIT
-    { Exp.EBoolLiteral b }
+    { Expr.EBoolLiteral b }
 | LPAREN e = expr RPAREN
     { e }
 | LPAREN RPAREN
-    { Exp.ETriv }
+    { Expr.ETriv }
 | LPAREN e1 = expr COMMA e2 = expr RPAREN
-    { Exp.EPair (e1, e2) }
-
-eid:
-| i = EID
-    { i }
+    { Expr.EPair (e1, e2) }
 
 ty:
-| t = ty_sum
+| t = topseq
     { t }
-| t1 = ty_sum ARROW t2 = ty
+| REC i = TID IS t = ty
+    { Typ.TRec (i, t) }
+| FORALL i = TID ARROW t = ty
+    { Typ.TForall (i, t) }
+
+topseq:
+| t = tsimple
+    { t }
+| t1 = topseq ARROW t2 = topseq %prec ARROW
     { Typ.TArrow (t1, t2) }
-
-ty_sum:
-| t = ty_prod
-    { t }
-| t1 = ty_prod PLUS t2 = ty_sum
+| t1 = topseq PLUS t2 = topseq %prec SUM
     { Typ.TSum (t1, t2) }
-
-ty_prod:
-| t = base_ty
-    { t }
-| t1 = base_ty TIMES t2 = ty_prod
+| t1 = topseq TIMES t2 = topseq %prec PROD
     { Typ.TProd (t1, t2) }
 
-base_ty:
+tsimple:
+| i = TID
+    { Typ.TVar i }
 | NUM
     { Typ.TNum }
 | BOOL
     { Typ.TBool }
 | UNIT
     { Typ.TUnit }
-| i = tid
-    { Typ.TVar (i)}
 | LPAREN t = ty RPAREN
     { t }
-| REC LPAREN i = tid DOT t = ty RPAREN
-    { Typ.TRec (i, t) }
-| FORALLT LPAREN i = tid DOT t = ty RPAREN
-    { Typ.TForall (i, t) }
-
-tid:
-| i = TID
-    { i }

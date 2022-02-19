@@ -15,7 +15,7 @@ module Typ = struct
   type t = (Identifier.t, Identifier.t) p
 end
 
-module Exp = struct
+module Expr = struct
     type unop =
         | OpNeg
 

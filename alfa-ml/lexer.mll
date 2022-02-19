@@ -57,24 +57,24 @@ and token = parse
     { FIX }
 | ','
     { COMMA }
-| "Rec"
+| "rec"
     { REC }
-| "Forall"
-    { FORALLT }
+| "forall"
+    { FORALL }
 | "roll"
     { ROLL }
 | "unroll"
     { UNROLL }
-| "forall"
-    { FORALL }
+| "typfun"
+    { TYPFUN }
 | '['
     { LSQUARE }
 | ']'
     { RSQUARE }
 | '@'
     { AT }
-| '.'
-    { DOT }
+| "is"
+    { IS }
 | 'L'
     { L }
 | 'R'
