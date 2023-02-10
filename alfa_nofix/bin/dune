@@ -1,0 +1,4 @@
+(executable
+ (public_name alfa_nofix)
+ (name main)
+ (libraries alfa_nofix))
