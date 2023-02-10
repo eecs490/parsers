@@ -15,7 +15,7 @@ module Typ = struct
   type t = (Identifier.t, Identifier.t) p
 end
 
-module Expr = struct
+module Exp = struct
     type unop =
         | OpNeg
 
@@ -30,8 +30,8 @@ module Expr = struct
 
     type t =
         | EVar of Identifier.t
-        | ENumLiteral of int
-        | EBoolLiteral of bool
+        | ENumLit of int
+        | EBoolLit of bool
         | EUnOp of unop * t
         | EBinOp of t * binop * t
         | EIf of t * t * t

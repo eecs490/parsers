@@ -7,7 +7,7 @@ let string_of_binop b = match b with
   | Syntax.OpTimes -> "OpTimes"
 
 let rec string_of_expr e = match e with
-  | Syntax.ENumLiteral n -> "ENumLiteral "^(string_of_int n)
+  | Syntax.ENumLit n -> "ENumLit "^(string_of_int n)
   | Syntax.EUnOp (unop, e) ->
     String.concat
       ""
@@ -57,6 +57,6 @@ let rec repeat channel =
   process optional_line;
   if continue then
     repeat channel
-  
+
 let () =
   repeat (Lexing.from_channel stdin)

@@ -90,16 +90,16 @@ right:
     { e }
 | e = right LPRJ
     { Exp.EPrjL (e) }
-| e = right RPRJ   
+| e = right RPRJ
     { Exp.EPrjR (e) }
 
 simple:
 | e = id
     { Exp.EVar (e) }
 | i = INT
-    { Exp.ENumLiteral i }
+    { Exp.ENumLit i }
 | b = BOOLLIT
-    { Exp.EBoolLiteral b }
+    { Exp.EBoolLit b }
 | h = EHOLE
     { Exp.EHole }
 | LPAREN e = expr RPAREN

@@ -29,8 +29,8 @@ module Exp = struct
     type t =
         | EHole
         | EVar of Identifier.t
-        | ENumLiteral of int
-        | EBoolLiteral of bool
+        | ENumLit of int
+        | EBoolLit of bool
         | EUnOp of unop * t
         | EBinOp of t * binop * t
         | EIf of t * t * t

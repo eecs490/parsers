@@ -18,7 +18,7 @@ main:
 
 expr:
 | i = INT
-    { ENumLiteral i }
+    { ENumLit i }
 | LPAREN e = expr RPAREN
     { e }
 | e1 = expr PLUS e2 = expr

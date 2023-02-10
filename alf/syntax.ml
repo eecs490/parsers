@@ -9,15 +9,15 @@ module Identifier = struct
   let equal = String.equal
 end
 
-module Expr = struct
+module Exp = struct
   type unop = OpNeg
 
   type binop = OpAp | OpLt | OpGt | OpEq | OpPlus | OpMinus | OpTimes
 
   type t =
     | EVar of Identifier.t
-    | ENumLiteral of int
-    | EBoolLiteral of bool
+    | ENumLit of int
+    | EBoolLit of bool
     | EUnOp of unop * t
     | EBinOp of t * binop * t
     | EIf of t * t * t
@@ -27,13 +27,13 @@ end
 
 module Value = struct
   type t =
-    | VNumLiteral of int
-    | VBoolLiteral of bool
-    | VFun of Identifier.t * Typ.t * Expr.t
+    | VNumLit of int
+    | VBoolLit of bool
+    | VFun of Identifier.t * Typ.t * Exp.t
 
-  let to_expr (v:t):Expr.t =
+  let to_expr (v:t):Exp.t =
       match v with
-      | VNumLiteral n -> ENumLiteral n
-      | VBoolLiteral b -> EBoolLiteral b
+      | VNumLit n -> ENumLit n
+      | VBoolLit b -> EBoolLit b
       | VFun (i, t, e) -> EFun (i, t, e)
 end

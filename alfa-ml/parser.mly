@@ -28,7 +28,7 @@
 %right SUM
 %right PROD
 
-%start <Syntax.Expr.t> main
+%start <Syntax.Exp.t> main
 %{ open Syntax %}
 
 %%
@@ -41,81 +41,81 @@ expr:
 | e = opseq
     { e }
 | LET i = EID OFTYPE t = ty BE e1 = expr IN e2 = expr
-    { Expr.ELet (i, Some(t), e1, e2) }
+    { Exp.ELet (i, Some(t), e1, e2) }
 | LET i = EID BE e1 = expr IN e2 = expr
-    { Expr.ELet (i, None, e1, e2) }
+    { Exp.ELet (i, None, e1, e2) }
 | IF e1 = expr THEN e2 = expr ELSE e3 = expr
-    { Expr.EIf (e1, e2, e3) }
+    { Exp.EIf (e1, e2, e3) }
 | FUN LPAREN i = EID OFTYPE t = ty RPAREN ARROW e = expr
-    { Expr.EFun (i, Some(t), e) }
+    { Exp.EFun (i, Some(t), e) }
 | FUN i = EID ARROW e = expr
-    { Expr.EFun (i, None, e) }
+    { Exp.EFun (i, None, e) }
 | FIX LPAREN i = EID OFTYPE t = ty RPAREN ARROW e = expr
-    { Expr.EFix (i, Some(t), e) }
+    { Exp.EFix (i, Some(t), e) }
 | FIX i = EID ARROW e = expr
-    { Expr.EFix (i, None, e) }
+    { Exp.EFix (i, None, e) }
 | L e = expr
-    { Expr.EInjL (e) }
+    { Exp.EInjL (e) }
 | R e = expr
-    { Expr.EInjR (e) }
+    { Exp.EInjR (e) }
 | CASE e1 = expr OF L LPAREN x = EID RPAREN ARROW e2 = expr ELSE R LPAREN y = EID RPAREN ARROW e3 = expr
-    { Expr.ECase (e1, x, e2, y, e3) }
+    { Exp.ECase (e1, x, e2, y, e3) }
 | LET LPAREN x = EID COMMA y = EID RPAREN BE e1 = expr IN e2 = expr
-    { Expr.ELetPair (x, y, e1, e2) }
+    { Exp.ELetPair (x, y, e1, e2) }
 | ROLL LPAREN e = expr RPAREN
-    { Expr.ERoll (e) }
+    { Exp.ERoll (e) }
 | UNROLL LPAREN e = expr RPAREN
-    { Expr.EUnroll (e) }
+    { Exp.EUnroll (e) }
 | TYPFUN t = TID ARROW e = expr
-    { Expr.ETypFun (t, e) }
+    { Exp.ETypFun (t, e) }
 
 opseq:
 | e = app
     { e }
 | e1 = opseq GT e2 = opseq %prec GT
-    { Expr.EBinOp (e1, OpGt, e2) }
+    { Exp.EBinOp (e1, OpGt, e2) }
 | e1 = opseq LT e2 = opseq %prec LT
-    { Expr.EBinOp (e1, OpLt, e2) }
+    { Exp.EBinOp (e1, OpLt, e2) }
 | e1 = opseq EQ e2 = opseq %prec EQ
-    { Expr.EBinOp (e1, OpEq, e2) }
+    { Exp.EBinOp (e1, OpEq, e2) }
 | e1 = opseq PLUS e2 = opseq %prec PLUS
-    { Expr.EBinOp (e1, OpPlus,e2) }
+    { Exp.EBinOp (e1, OpPlus,e2) }
 | e1 = opseq MINUS e2 = opseq %prec MINUS
-    { Expr.EBinOp (e1, OpMinus, e2) }
+    { Exp.EBinOp (e1, OpMinus, e2) }
 | e1 = opseq TIMES e2 = opseq %prec TIMES
-    { Expr.EBinOp (e1, OpTimes, e2) }
+    { Exp.EBinOp (e1, OpTimes, e2) }
 
 app:
 | e = right
     { e }
 | e1 = app e2 = right
-    { Expr.EBinOp (e1, OpAp, e2) }
+    { Exp.EBinOp (e1, OpAp, e2) }
 | MINUS e = right
-    { Expr.EUnOp (OpNeg, e) }
+    { Exp.EUnOp (OpNeg, e) }
 
 right:
 | e = simple
     { e }
 | e = right LPRJ
-    { Expr.EPrjL (e) }
+    { Exp.EPrjL (e) }
 | e = right RPRJ
-    { Expr.EPrjR (e) }
+    { Exp.EPrjR (e) }
 | e = right LSQUARE AT t = ty RSQUARE
-    { Expr.ETypAp (e, t) }
+    { Exp.ETypAp (e, t) }
 
 simple:
 | i = EID
-    { Expr.EVar i }
+    { Exp.EVar i }
 | i = INT
-    { Expr.ENumLiteral i }
+    { Exp.ENumLit i }
 | b = BOOLLIT
-    { Expr.EBoolLiteral b }
+    { Exp.EBoolLit b }
 | LPAREN e = expr RPAREN
     { e }
 | LPAREN RPAREN
-    { Expr.ETriv }
+    { Exp.ETriv }
 | LPAREN e1 = expr COMMA e2 = expr RPAREN
-    { Expr.EPair (e1, e2) }
+    { Exp.EPair (e1, e2) }
 
 ty:
 | t = topseq

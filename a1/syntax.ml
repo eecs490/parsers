@@ -5,6 +5,6 @@ type binop =
   | OpPlus | OpMinus | OpTimes
 
 type expr =
-| ENumLiteral of int
+| ENumLit of int
 | EUnOp of unop * expr
 | EBinOp of expr * binop * expr
